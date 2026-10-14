@@ -1,0 +1,27 @@
+# Render Blueprint: Telestorage on Render's free web service (no card needed).
+# Dashboard → New → Blueprint → pick this repository. Render asks for the
+# values marked `sync: false`; everything else is set here.
+#
+# The free instance's disk is wiped whenever it restarts or wakes from sleep.
+# That's fine: files live in Telegram, and the server restores its index from
+# the backup pinned in your channel every time it starts (see README → Free hosting).
+services:
+  - type: web
+    name: telestorage
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: AUTH_PASSWORD
+        sync: false
+      - key: TG_API_ID
+        sync: false
+      - key: TG_API_HASH
+        sync: false
+      - key: TG_BOT_TOKENS
+        sync: false
+      - key: TG_CHANNEL_ID
+        sync: false
+      # Keep the same key forever: lose it and encrypted files can't be read.
+      - key: ENCRYPTION_KEY
+        sync: false

@@ -1,0 +1,33 @@
+services:
+  telestorage:
+    build: .
+    image: telestorage:latest
+    restart: unless-stopped
+    # On stop the server backs its index up to Telegram and hands the drive over first.
+    stop_grace_period: 40s
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - telestorage-data:/data
+    # Bound to localhost: reach it from outside through the tunnel below,
+    # Tailscale, or your own reverse proxy (Caddy/nginx) — not raw port 3000.
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  # Optional: zero-config HTTPS from anywhere, works behind NAT/CGNAT.
+  # Create a tunnel at https://one.dash.cloudflare.com → Networks → Tunnels,
+  # point its public hostname at http://telestorage:3000, then:
+  #   CLOUDFLARE_TUNNEL_TOKEN=... docker compose --profile tunnel up -d
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - telestorage
+    profiles: ["tunnel"]
+
+volumes:
+  telestorage-data:
