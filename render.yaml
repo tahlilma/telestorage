@@ -10,6 +10,9 @@ services:
     name: telestorage
     runtime: docker
     plan: free
+    # Next to Telegram's DC 5 (Singapore), where these bots live: every byte
+    # goes between the server and Telegram. Render can't move a service later.
+    region: singapore
     healthCheckPath: /api/health
     envVars:
       - key: AUTH_PASSWORD
